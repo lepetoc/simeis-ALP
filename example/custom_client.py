@@ -1,5 +1,5 @@
 PORT=8080
-URL=f"http://0.0.0.0:{PORT}"
+URL=f"http://103.45.247.164:{PORT}"
 
 import os
 import sys
@@ -35,6 +35,8 @@ class Game:
         self.pla = None
         self.modtype = None
 
+        self.trader = None
+
     def get(self, path, **qry):
         if hasattr(self, "player"):
             qry["key"] = self.player["key"]
@@ -47,7 +49,7 @@ class Game:
             ])
 
         qry = f"{URL}{path}{tail}"
-        reply = urllib.request.urlopen(qry, timeout=1)
+        reply = urllib.request.urlopen(qry, timeout=45)
 
         data = json.loads(reply.read().decode())
         err = data.pop("error")
@@ -126,8 +128,8 @@ class Game:
 
     def hire_first_trader(self, sta):
         # Hire a trader, assign it on our station
-        trader = self.get(f"/station/{sta}/crew/hire/trader")["id"]
-        self.get(f"/station/{sta}/crew/assign/{trader}/trading")
+        self.trader = self.get(f"/station/{sta}/crew/hire/trader")["id"]
+        self.get(f"/station/{sta}/crew/assign/{self.trader}/trading")
 
     def travel(self, sid, pos):
         costs = self.get(f"/ship/{sid}/navigate/{pos[0]}/{pos[1]}/{pos[2]}")
@@ -279,6 +281,7 @@ class Game:
     # - Refuel & repair the ship
     def go_sell(self):
         self.wait_idle(self.sid) # If we are currently occupied, wait
+
         ship = self.get(f"/ship/{self.sid}")
         station = self.get(f"/station/{self.sta}")
 
@@ -286,20 +289,23 @@ class Game:
         if ship["position"] != station["position"]:
             self.travel(ship["id"], station["position"])
 
+        self.ship_repair(self.sid)
+        self.ship_refuel(self.sid)
+
         self.wait_idle(self.sid)
         
         # Unload the cargo and sell it directly on the market
         for res, amnt in ship["cargo"]["resources"].items():
             if amnt == 0.0:
                 continue
+            # for resource in range(int(amnt) ):
             unloaded = self.get(f"/ship/{self.sid}/unload/{res}/{amnt}")
             sold = self.get(f"/market/{self.sta}/sell/{res}/{amnt}")
+            
             print("[*] Unloaded and sold {} of {}, for {} credits".format(
                 unloaded["unloaded"], res, sold["added_money"]
             ))
-
-        self.ship_repair(self.sid)
-        self.ship_refuel(self.sid)
+    
 
 if __name__ == "__main__":
     name = sys.argv[1]
