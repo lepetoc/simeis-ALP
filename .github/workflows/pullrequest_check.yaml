@@ -1,0 +1,15 @@
+name: CI
+trigger:
+  on:
+    pull_request:
+      branches:
+      - main
+
+jobs:
+  sanity:
+    name: sanity
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo check --verbose
