@@ -1,0 +1,20 @@
+[package]
+name = "simeis-data"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand_distr = "0.5.1"
+
+base64 = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }
+tokio = { workspace = true }
+
+[features]
+default = []
+testing = []

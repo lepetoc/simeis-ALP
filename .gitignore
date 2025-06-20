@@ -1,0 +1,6 @@
+target
+.cargohome
+result
+*.zip
+.~lock.*.ods#
+/example/*.json
