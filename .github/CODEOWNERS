@@ -1,1 +1,3 @@
-*.rs @lepetoc
+/simeis-server/*.rs @lepetoc
+/simeis-data/*.rs @lchaboissier
+*.py @xelame
