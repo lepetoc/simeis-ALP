@@ -1,0 +1,19 @@
+name: Dependabot
+
+on:
+    workflow_dispatch:
+    schedule:
+      - cron: "0 1 * * *"
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
+    - name: check update
+      run: cargo update
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        labels: bot/update
