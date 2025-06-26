@@ -20,3 +20,5 @@ jobs:
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Build
       run: make build-simeis
+    - name: Clean artifacts
+      run: make clean
