@@ -11,9 +11,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions-rust-lang/setup-rust-toolchain@v1
-    - name: check update
+    - name: Check Update
       run: cargo update
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
-        labels: bot/update
+        title: bot/update
