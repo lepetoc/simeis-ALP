@@ -9,11 +9,26 @@ jobs:
   check-update:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Repository
     - uses: actions/checkout@v4
+    
+    - name: Checkout Rust 
     - uses: actions-rust-lang/setup-rust-toolchain@v1
+    
     - name: Check Update
       run: cargo update
+      
+    - name: Check for changes in Cargo.lock
+      id: check_diff
+      run: |
+          if git diff --exit-code --quiet Cargo.lock; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
+      if: steps.check_diff.outputs.changed == 'true'
+      uses: peter-evans/create-pull-request@v6
       with:
-        title: bot/update
+          title: bot/update
