@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
-    - uses: actions/checkout@v4
+      uses: actions/checkout@v4
     
     - name: Checkout Rust 
-    - uses: actions-rust-lang/setup-rust-toolchain@v1
+      uses: actions-rust-lang/setup-rust-toolchain@v1
     
     - name: Check Update
-    - run: cargo update
+      run: cargo update
       
     - name: Create Pull Request
-    - uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@v6
       with:
           title: bot/update
