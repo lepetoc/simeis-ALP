@@ -28,7 +28,7 @@ jobs:
           fi
 
     - name: Create Pull Request
-      if: steps.check_diff.outputs.changed == 'true'
-      uses: peter-evans/create-pull-request@v6
+    - if: steps.check_diff.outputs.changed == 'true'
+    - uses: peter-evans/create-pull-request@v6
       with:
           title: bot/update
