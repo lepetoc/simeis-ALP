@@ -1,12 +1,14 @@
 PORT=8080
 URL=f"http://0.0.0.0:{PORT}"
+# URL=f"http://103.45.247.164:{PORT}"
 
 import os
 import json
 import time
 import urllib.request
 
-# TODO HTTP server that serves a graph of the data
+# TODO Put names to track in sys.argv
+#      If a player name starts with one of the names in sys.argv, add it even if it's not in the top NMAX players
 
 INIT = False
 HIST = {}
@@ -45,9 +47,9 @@ def get(path):
             os.system("clear")
             HIST = {}
             INIT=False
-            breakpoint()
-            # print("DEAD SERVER")
-            # time.sleep(1)
+            # breakpoint()
+            print("DEAD SERVER")
+            time.sleep(1)
             continue
 
     data = json.loads(reply.read().decode())
@@ -88,13 +90,16 @@ def disp_market(resources):
     max_mid = max([len(d["mid"]) for _, d in disp.items()])
     max_tail = max([len(d["tail"]) for _, d in disp.items()])
 
+    buffer = ""
     for res, d in disp.items():
-        print("{}{}{}{}{}{}{}".format(
+        buffer += "{}{}{}{}{}{}{}".format(
             res, " " * (max_res + 1 - len(res)),
             d["head"], " " * (max_head + 1 - len(d["head"])),
             d["mid"], " " * (max_mid + 1 - len(d["mid"])),
             d["tail"], " " * (max_tail + 1 - len(d["tail"])),
-        ))
+        ) + "\n"
+
+    return buffer
 
 resources = get_resources()
 for (res, data) in resources.items():
@@ -103,11 +108,8 @@ for (res, data) in resources.items():
 
 while True:
     time.sleep(2)
-    os.system("clear")
-    disp_market(resources)
-
-    print("")
-
+    buffer = disp_market(resources)
+    buffer += "\n"
     info = get_info()
     if len(info) == 0:
         print("No players on the server")
@@ -117,14 +119,17 @@ while True:
         if p["lost"]:
             p["score"] = -1.0
 
+    buffer += "{} Players still in the game\n".format(len([True for p in info.values() if not p["lost"]]))
     players = sorted(info.items(), key=lambda p: p[1]["score"] + p[1]["potential"], reverse=True)[:NMAX]
     max_score = max([max(v["score"], 0) + v["potential"] for v in info.values()])
+    maxn = max([len(data["name"]) for (_, data) in players])
     for (player, data) in players:
         if player not in HIST:
             HIST[player] = []
 
+        spaces = maxn - len(data["name"]) + 1
         if data["lost"]:
-            print("Player {}:\tLOST".format(data["name"]))
+            buffer += "Player {} LOST".format(data["name"] + " " * spaces) + "\n"
             continue
 
         s = max(0, data["score"]) + data["potential"]
@@ -136,8 +141,10 @@ while True:
         avg_lasts = max([n[1] for n in HIST[player][-30:]])
 
         bar = mkbar(data["score"], data["potential"], max_score)
-        print("Player {}:\t{} {} (~{}/sec)\tpotential: {}".format(
-            data["name"], bar, round(data["score"], 2),
+        buffer += "Player {} {} {} (~{}/sec)\tpotential: {}".format(
+            data["name"] + " " * spaces, bar, round(data["score"], 2),
             round(avg_lasts, 2),
             round(data["potential"], 2)
-        ))
+        ) + "\n"
+    os.system("clear")
+    print(buffer)
