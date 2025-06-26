@@ -17,8 +17,18 @@ jobs:
     
     - name: Check Update
       run: cargo update
+
+    - name: Check for changes
+      id: changes
+      run: |
+          if git diff --quiet; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+          fi
       
     - name: Create Pull Request
+      if: steps.changes.outputs.no_changes == 'false'
       uses: peter-evans/create-pull-request@v6
       with:
           title: bot/update
