@@ -11,5 +11,9 @@ jobs:
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Cargo Check
       run: make check
+    - name: Cargo formatter
+      run: make format
+    - name: Cargo linter
+      run: make lint
     - name: Cargo test
       run: make test
