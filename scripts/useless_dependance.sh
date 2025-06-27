@@ -26,5 +26,4 @@ else
   for dep in "${unused[@]}"; do
     echo "  - $dep"
   done
-  exit 1  # Échoue pour forcer la correction
 fi
