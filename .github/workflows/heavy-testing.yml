@@ -1,0 +1,40 @@
+name: Analyse Avancée du code 
+
+on:
+  push:
+    branches:
+      - 'release/**'  
+      
+jobs:
+  advanced-analyses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1.85.0
+
+      - name: Install audit and udeps
+        run: |
+          cargo install cargo-audit
+
+      - name: Test Unitaire
+        run: cargo test --features heavy-testing
+
+      - name: Debug Mode
+        run: cargo build --features heavy-testing
+
+      - name: Test Scripté
+        run: ./scripts/tests_fonctionnel.sh
+
+      - name: Check si Fabrice Eboué existe
+        if: ${{ failure() }}
+        run: |
+          echo "test Fonctionnel Echoué"
+          exit 1
+
+      - name: Run cargo-audit (security)
+        run: cargo audit
+
+      - name: Run Check dependence inutile
+        run: ./scripts/useless_dependance.sh
+
+
