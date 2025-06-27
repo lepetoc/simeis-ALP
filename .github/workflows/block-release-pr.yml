@@ -8,6 +8,7 @@ on:
 
 jobs:
   block-pull-request:
+    if: ${{ !startsWith(github.head_ref, 'bug/') || github.head_ref != 'main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Close Pull
