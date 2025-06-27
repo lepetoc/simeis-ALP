@@ -1,0 +1,17 @@
+name: Block pull request
+on:
+  pull_request_target:
+    types:
+      - opened
+    branches:
+      - 'releases/**'
+
+job:
+  block-pull-request:
+    if: {{startsWith(github.head_ref, 'releases/') || github.head_ref === "main"}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Pull
+        uses: peter-evans/close-pull@v3
+        with:
+          comment: Auto-closing pull request
