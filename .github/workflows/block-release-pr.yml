@@ -4,7 +4,7 @@ on:
     types:
       - opened
     branches:
-      - 'releases/**'
+      - 'release/**'
 
 jobs:
   block-pull-request:
