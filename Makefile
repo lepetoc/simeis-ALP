@@ -20,4 +20,4 @@ format:
 	cargo fmt --check
 
 lint:
-	cargo clippy -D warnings
+	cargo clippy -- -D warnings
