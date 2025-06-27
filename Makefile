@@ -15,3 +15,9 @@ test:
 
 clean:
 	cargo clean
+
+format:
+	cargo fmt --check
+
+lint:
+	cargo clippy -D warnings

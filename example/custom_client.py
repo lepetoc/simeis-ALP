@@ -1,5 +1,5 @@
-PORT=8080
-URL=f"http://103.45.247.164:{PORT}"
+PORT = 8080
+URL = f"http://0.0.0.0:{PORT}"
 
 import os
 import sys
@@ -9,17 +9,21 @@ import json
 import string
 import urllib.request
 
+
 class SimeisError(Exception):
     pass
+
 
 # Théorème de Pythagore pour récupérer la distance entre 2 points dans l'espace 3D
 def get_dist(a, b):
     return math.sqrt(((a[0] - b[0]) ** 2) + ((a[1] - b[1]) ** 2) + ((a[2] - b[2]) ** 2))
 
+
 # Check if types are present in the list
 def check_has(alld, key, *req):
     alltypes = [c[key] for c in alld.values()]
     return all([k in alltypes for k in req])
+
 
 class Game:
     def __init__(self, username):
@@ -29,9 +33,9 @@ class Game:
         self.setup_player(username)
 
         # Useful for our game loops
-        self.pid = self.player["playerId"] # ID of our player
-        self.sid = None    # ID of our ship
-        self.sta = None    # ID of our station
+        self.pid = self.player["playerId"]  # ID of our player
+        self.sid = None  # ID of our ship
+        self.sta = None  # ID of our station
         self.pla = None
         self.modtype = None
 
@@ -44,9 +48,9 @@ class Game:
         tail = ""
         if len(qry) > 0:
             tail += "?"
-            tail += "&".join([
-                "{}={}".format(k, urllib.parse.quote(v)) for k, v in qry.items()
-            ])
+            tail += "&".join(
+                ["{}={}".format(k, urllib.parse.quote(v)) for k, v in qry.items()]
+            )
 
         qry = f"{URL}{path}{tail}"
         reply = urllib.request.urlopen(qry, timeout=45)
@@ -60,22 +64,28 @@ class Game:
 
     def disp_status(self):
         status = game.get("/player/" + str(game.pid))
-        print("[*] Current status: {} credits, costs: {}, time left before lost: {} secs".format(
-            round(status["money"], 2), round(status["costs"], 2), int(status["money"] / status["costs"]),
-        ))
+        print(
+            "[*] Current status: {} credits, costs: {}, time left before lost: {} secs".format(
+                round(status["money"], 2),
+                round(status["costs"], 2),
+                int(status["money"] / status["costs"]),
+            )
+        )
 
     # If we have a file containing the player ID and key, use it
     # If not, let's create a new player
     # If the player has lost, print an error message
     def setup_player(self, username, force_register=False):
         # Sanitize the username, remove any symbols
-        username = "".join([c for c in username if c in string.ascii_letters + string.digits]).lower()
+        username = "".join(
+            [c for c in username if c in string.ascii_letters + string.digits]
+        ).lower()
 
         # If we don't have any existing account
         if force_register or not os.path.isfile(f"./{username}.json"):
             player = self.get(f"/player/new/{username}")
             with open(f"./{username}.json", "w") as f:
-                json.dump(player, f, indent=2)       
+                json.dump(player, f, indent=2)
             print(f"[*] Created player {username}")
             self.player = player
 
@@ -97,14 +107,16 @@ class Game:
         # If the player already failed, we must reset the server
         # Or recreate an account with a new nickname
         if player["money"] <= 0.0:
-            print("!!! Player already lost, please restart the server to reset the game")
+            print(
+                "!!! Player already lost, please restart the server to reset the game"
+            )
             sys.exit(0)
 
     def buy_first_ship(self, sta):
         # Get all the ships available for purchasing in the station
         available = self.get(f"/station/{sta}/shipyard/list")["ships"]
         # Get the cheapest option
-        cheapest = sorted(available, key = lambda ship: ship["price"])[0]
+        cheapest = sorted(available, key=lambda ship: ship["price"])[0]
         print("[*] Purchasing the first ship for {} credits".format(cheapest["price"]))
         # Buy it
         self.get(f"/station/{sta}/shipyard/buy/" + str(cheapest["id"]))
@@ -164,7 +176,9 @@ class Game:
         if station["resources"]["HullPlate"] > 0:
             # Use the plates in stock to repair the ship
             repair = self.get(f"/station/{self.sta}/repair/{self.sid}")
-            print("[*] Repaired {} hull plates on the ship".format(repair["added-hull"]))
+            print(
+                "[*] Repaired {} hull plates on the ship".format(repair["added-hull"])
+            )
 
     # Refuel the ship:    Buy the fuel, then ask for a refill
     def ship_refuel(self, sid):
@@ -188,10 +202,12 @@ class Game:
         if station["resources"]["Fuel"] > 0:
             # Use the fuel in stock to refill the ship
             refuel = self.get(f"/station/{self.sta}/refuel/{self.sid}")
-            print("[*] Refilled {} fuel on the ship for {} credits".format(
-                refuel["added-fuel"],
-                bought["removed_money"],
-            ))
+            print(
+                "[*] Refilled {} fuel on the ship for {} credits".format(
+                    refuel["added-fuel"],
+                    bought["removed_money"],
+                )
+            )
 
     # Initializes the game:
     #     - Ensure our player exists
@@ -213,7 +229,7 @@ class Game:
 
         if len(status["ships"]) == 0:
             self.buy_first_ship(self.sta)
-            status = self.get(f"/player/{self.pid}") # Update our status
+            status = self.get(f"/player/{self.pid}")  # Update our status
         ship = status["ships"][0]
         self.sid = ship["id"]
 
@@ -225,8 +241,8 @@ class Game:
         # Scan the galaxy sector, detect which planet is the nearest
         station = self.get(f"/station/{self.sta}")
         planets = self.get(f"/station/{self.sta}/scan")["planets"]
-        self.pla = sorted(planets,
-            key=lambda pla: get_dist(station["position"], pla["position"])
+        self.pla = sorted(
+            planets, key=lambda pla: get_dist(station["position"], pla["position"])
         )[0]
 
         # If the planet is solid, we need a Miner to mine it
@@ -235,7 +251,7 @@ class Game:
             self.modtype = "Miner"
         else:
             self.modtype = "GasSucker"
-        
+
         # Ensure the ship has a corresponding module, buy one if we don't
         if not check_has(ship["modules"], "modtype", self.modtype):
             self.buy_first_mining_module(self.modtype, self.sta, self.sid)
@@ -251,17 +267,16 @@ class Game:
 
         nearest = planet
 
-
         print("[*] Targeting planet at", nearest["position"])
         # If we are currently occupied, wait
-        self.wait_idle(self.sid) 
+        self.wait_idle(self.sid)
 
         ship = self.get(f"/ship/{self.sid}")
 
         # If we are not current at the position of the target planet, travel there
         if ship["position"] != nearest["position"]:
             self.travel(ship["id"], nearest["position"])
-        
+
         # We wait to get to the planet
         self.wait_idle(self.sid)
 
@@ -272,7 +287,9 @@ class Game:
             print(f"\t- Extraction of {res}: {amnt}/sec")
 
         # Wait until the cargo is full
-        self.wait_idle(self.sid) # The ship will have the state "Idle" once the cargo is full
+        self.wait_idle(
+            self.sid
+        )  # The ship will have the state "Idle" once the cargo is full
         print("[*] The cargo is full, stopping mining process")
 
     # - Go back to the station
@@ -280,7 +297,7 @@ class Game:
     # - Sell it on the market
     # - Refuel & repair the ship
     def go_sell(self):
-        self.wait_idle(self.sid) # If we are currently occupied, wait
+        self.wait_idle(self.sid)  # If we are currently occupied, wait
 
         ship = self.get(f"/ship/{self.sid}")
         station = self.get(f"/station/{self.sta}")
@@ -293,7 +310,7 @@ class Game:
         self.ship_refuel(self.sid)
 
         self.wait_idle(self.sid)
-        
+
         # Unload the cargo and sell it directly on the market
         for res, amnt in ship["cargo"]["resources"].items():
             if amnt == 0.0:
@@ -301,11 +318,13 @@ class Game:
             # for resource in range(int(amnt) ):
             unloaded = self.get(f"/ship/{self.sid}/unload/{res}/{amnt}")
             sold = self.get(f"/market/{self.sta}/sell/{res}/{amnt}")
-            
-            print("[*] Unloaded and sold {} of {}, for {} credits".format(
-                unloaded["unloaded"], res, sold["added_money"]
-            ))
-    
+
+            print(
+                "[*] Unloaded and sold {} of {}, for {} credits".format(
+                    unloaded["unloaded"], res, sold["added_money"]
+                )
+            )
+
 
 if __name__ == "__main__":
     name = sys.argv[1]
