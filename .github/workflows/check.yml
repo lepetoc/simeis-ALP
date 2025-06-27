@@ -1,6 +1,6 @@
 name: Check push
 on:
-  issues:
+  pull_request:
     types: [ opened, edited ]
   push:
     branches-ignore: [ "main" ]
