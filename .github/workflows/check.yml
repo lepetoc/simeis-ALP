@@ -1,5 +1,7 @@
 name: Check push
 on:
+  issues:
+    types: [ opened, edited ]
   push:
     branches-ignore: [ "main" ]
 
