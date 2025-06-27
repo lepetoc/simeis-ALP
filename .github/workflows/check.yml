@@ -1,5 +1,7 @@
 name: Check push
 on:
+  pull_request:
+    types: [ opened, edited ]
   push:
     branches-ignore: [ "main" ]
 
@@ -11,5 +13,9 @@ jobs:
     - uses: actions-rust-lang/setup-rust-toolchain@v1
     - name: Cargo Check
       run: make check
+    - name: Cargo formatter
+      run: make format
+    - name: Cargo linter
+      run: make lint
     - name: Cargo test
       run: make test
