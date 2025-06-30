@@ -1,12 +1,12 @@
 use base64::{prelude::BASE64_STANDARD, Engine};
 use std::collections::{BTreeMap, HashMap};
-use tokio::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
-use std::time::{Duration, Instant};
 
-#[cfg(not(feature="testing"))]
+#[cfg(not(feature = "testing"))]
 use tokio::sync::mpsc::error::TryRecvError;
 
 use rand::{Rng, SeedableRng};
@@ -27,7 +27,6 @@ pub enum GameSignal {
     Stop,
     Tick,
 }
-
 
 #[derive(Clone)]
 pub struct Game {
@@ -62,9 +61,7 @@ impl Game {
 
         let thread_data = data.clone();
         // TODO Reduce stack size of this task
-        let thread = tokio::spawn(async move {
-            thread_data.start(recv_stop, sysrecv).await
-        });
+        let thread = tokio::spawn(async move { thread_data.start(recv_stop, sysrecv).await });
         (thread, data)
     }
 
@@ -87,12 +84,13 @@ impl Game {
                 Err(e) => {
                     log::error!("Error while getting next tick / stop signal:  {e:?}");
                     None
-                },
+                }
             };
 
             match got {
                 Some(GameSignal::Tick) => {
-                    self.threadloop(&mut rng, &mut market_last_tick, &syslog).await;
+                    self.threadloop(&mut rng, &mut market_last_tick, &syslog)
+                        .await;
 
                     #[cfg(not(feature = "testing"))]
                     {
@@ -100,7 +98,7 @@ impl Game {
                         tokio::time::sleep(sleepmin_iter.saturating_sub(took)).await;
                         last_iter = Instant::now();
                     }
-                },
+                }
 
                 None | Some(GameSignal::Stop) => break 'main,
             }
@@ -116,7 +114,7 @@ impl Game {
         let mut all_players: Vec<PlayerId> = players.keys().cloned().collect();
         all_players.sort();
         for player_id in all_players {
-            let mut player = players.get(&player_id).unwrap().write().await;    // OK
+            let mut player = players.get(&player_id).unwrap().write().await; // OK
             player.update_money(syslog, ITER_PERIOD.as_secs_f64()).await;
 
             let mut deadship = vec![];
@@ -129,7 +127,9 @@ impl Game {
                             if ship.hull_decay >= ship.hull_decay_capacity {
                                 deadship.push(*id);
                             } else {
-                                syslog.event(player_id, SyslogEvent::ShipFlightFinished(*id)).await;
+                                syslog
+                                    .event(player_id, SyslogEvent::ShipFlightFinished(*id))
+                                    .await;
                             }
                         }
                     }
@@ -138,21 +138,25 @@ impl Game {
                         let finished = ship.update_extract(ITER_PERIOD.as_secs_f64());
                         if finished {
                             ship.state = ShipState::Idle;
-                            syslog.event(player_id, SyslogEvent::ExtractionStopped(*id)).await;
+                            syslog
+                                .event(player_id, SyslogEvent::ExtractionStopped(*id))
+                                .await;
                         }
                     }
                     _ => {}
                 }
             }
             for id in deadship {
-                syslog.event(player_id, SyslogEvent::ShipDestroyed(id)).await;
+                syslog
+                    .event(player_id, SyslogEvent::ShipDestroyed(id))
+                    .await;
                 player.ships.remove(&id);
             }
         }
 
         if rng.random_bool(market_change_proba) {
             #[cfg(not(feature = "testing"))]
-            self.market.write().await.update_prices(rng);    // OK
+            self.market.write().await.update_prices(rng); // OK
             *mlt = Instant::now();
         }
 

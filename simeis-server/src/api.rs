@@ -55,14 +55,24 @@ macro_rules! get_station {
             return build_response(Err(Errcode::NoSuchStation(*$id)));
         };
         drop(player);
-        $srv.galaxy.read().await.get_station(&station_coord).await.unwrap()
+        $srv.galaxy
+            .read()
+            .await
+            .get_station(&station_coord)
+            .await
+            .unwrap()
     }};
 
     ($srv:expr, $id:expr; $player:expr) => {{
         let Some(station_coord) = $player.stations.get($id).cloned() else {
             return build_response(Err(Errcode::NoSuchStation(*$id)));
         };
-        $srv.galaxy.read().await.get_station(&station_coord).await.unwrap()
+        $srv.galaxy
+            .read()
+            .await
+            .get_station(&station_coord)
+            .await
+            .unwrap()
     }};
 
     ($srv:expr, $id:expr; $player:expr; $galaxy:expr) => {{
@@ -414,14 +424,14 @@ async fn buy_crew_upgrade(
 
     let player = get_player!(srv, req);
     let mut player = player.write().await;
-    let mut galaxy = srv.galaxy.write().await;
+    let galaxy = srv.galaxy.read().await;
     let station = get_station!(srv, station_id; player; galaxy);
     let station = station.read().await;
 
     let res = player.upgrade_crew_rank(&station, ship_id, crew_id);
     if res.is_ok() {
         drop(station);
-        player.update_wages(&mut galaxy).await;
+        player.update_wages(&galaxy).await;
     }
     build_response(res.map(|(p, r)| json!({ "new-rank": r, "cost": p})))
 }
@@ -461,11 +471,7 @@ async fn assign_trader(
     let station = get_station!(srv, player, station_id);
     let mut station = station.write().await;
 
-    build_response(
-        station
-            .assign_trader(*crew_id)
-            .map(|_| json!({})),
-    )
+    build_response(station.assign_trader(*crew_id).map(|_| json!({})))
 }
 
 // CHECKED
@@ -486,11 +492,7 @@ async fn assign_pilot(
     let Some(ship) = player.ships.get_mut(ship_id) else {
         return build_response(Err(Errcode::ShipNotFound(*ship_id)));
     };
-    build_response(
-        station
-            .onboard_pilot(*crew_id, ship)
-            .map(|_| json!({})),
-    )
+    build_response(station.onboard_pilot(*crew_id, ship).map(|_| json!({})))
 }
 
 // CHECKED
@@ -541,7 +543,7 @@ async fn get_prices_ship_module(
     req: HttpRequest,
 ) -> impl web::Responder {
     let player = get_player!(srv, req);
-    let _station = get_station!(srv, player, id.as_ref());    // Ensure it exists
+    let _station = get_station!(srv, player, id.as_ref()); // Ensure it exists
 
     // TODO (#22) Price based on station
     let mut res: BTreeMap<ShipModuleType, f64> = BTreeMap::new();
@@ -671,7 +673,6 @@ async fn get_station_upgrades(
     id: Path<StationId>,
     req: HttpRequest,
 ) -> impl web::Responder {
-
     let player = get_player!(srv, req);
     let station = get_station!(srv, player, id.as_ref());
     let station = station.read().await;
@@ -729,9 +730,7 @@ async fn repair_ship(
         return build_response(Err(Errcode::ShipNotFound(*ship_id)));
     };
 
-    let res = station
-            .repair_ship(ship)
-            .map(|v| json!({"added-hull": v}));
+    let res = station.repair_ship(ship).map(|v| json!({"added-hull": v}));
     build_response(res)
 }
 
@@ -826,7 +825,9 @@ async fn start_extraction(
     };
     let galaxy = srv.galaxy.read().await;
     build_response(
-        ship.start_extraction(&galaxy).await.map(|v| to_value(v).unwrap())
+        ship.start_extraction(&galaxy)
+            .await
+            .map(|v| to_value(v).unwrap()),
     )
 }
 
@@ -844,10 +845,7 @@ async fn stop_extraction(
         return build_response(Err(Errcode::ShipNotFound(*id)));
     };
 
-    build_response(
-        ship.stop_extraction()
-            .map(|v| to_value(v).unwrap()),
-    )
+    build_response(ship.stop_extraction().map(|v| to_value(v).unwrap()))
 }
 
 // CHECKED
@@ -882,13 +880,15 @@ async fn unload_ship_cargo(
     let res = ship.unload_cargo(&resource, *amnt, station.deref_mut());
 
     if let Ok(0.0) = res {
-        srv.syslog.event(
-            &pid,
-            SyslogEvent::UnloadedNothing {
-                station_cargo: station.cargo.clone(),
-                ship_cargo: ship.cargo.clone(),
-            },
-        ).await;
+        srv.syslog
+            .event(
+                &pid,
+                SyslogEvent::UnloadedNothing {
+                    station_cargo: station.cargo.clone(),
+                    ship_cargo: ship.cargo.clone(),
+                },
+            )
+            .await;
     }
     build_response(res.map(|v| json!({ "unloaded": v })))
 }
@@ -947,8 +947,8 @@ async fn sell_resource(
 
     let mut market = srv.market.write().await;
     let res = station
-            .sell_resource(&resource, *amnt, player.deref_mut(), market.deref_mut())
-            .map(|tx| to_value(tx).unwrap());
+        .sell_resource(&resource, *amnt, player.deref_mut(), market.deref_mut())
+        .map(|tx| to_value(tx).unwrap());
     build_response(res)
 }
 
@@ -978,9 +978,7 @@ async fn get_fee_rate(
 // CHECKED
 #[cfg(feature = "testing")]
 #[web::get("/tick")]
-async fn tick_server(
-    srv: GameState,
-) -> impl web::Responder {
+async fn tick_server(srv: GameState) -> impl web::Responder {
     let Ok(_) = srv.send_sig.send(simeis_data::game::GameSignal::Tick).await else {
         return build_response(Err(Errcode::GameSignalSend));
     };
@@ -993,18 +991,24 @@ async fn resources_info() -> impl web::Responder {
     let mut data = BTreeMap::new();
     for res in Resource::iter() {
         if res.mineable(u8::MAX) || res.suckable(u8::MAX) {
-            data.insert(format!("{res:?}"), json!({
-                "base-price": res.base_price(),
-                "volume": res.volume(),
-                "difficulty": res.extraction_difficulty(),
-                "min-rank": res.min_rank(),
-            }));
+            data.insert(
+                format!("{res:?}"),
+                json!({
+                    "base-price": res.base_price(),
+                    "volume": res.volume(),
+                    "difficulty": res.extraction_difficulty(),
+                    "min-rank": res.min_rank(),
+                }),
+            );
         } else {
-            data.insert(format!("{res:?}"), json!({
-                "base-price": res.base_price(),
-                "volume": res.volume(),
-                "solid": res.mineable(u8::MAX),
-            }));
+            data.insert(
+                format!("{res:?}"),
+                json!({
+                    "base-price": res.base_price(),
+                    "volume": res.volume(),
+                    "solid": res.mineable(u8::MAX),
+                }),
+            );
         }
     }
     build_response(Ok(to_value(data).unwrap()))
@@ -1027,7 +1031,9 @@ async fn gamestats(srv: GameState) -> impl web::Responder {
             for (_, coord) in p.stations.iter() {
                 let sta = galaxy.get_station(coord).await.unwrap();
                 let station = sta.read().await;
-                s += station.cargo.resources
+                s += station
+                    .cargo
+                    .resources
                     .iter()
                     .map(|(r, amnt)| r.base_price() * amnt)
                     .sum::<f64>();
@@ -1035,15 +1041,18 @@ async fn gamestats(srv: GameState) -> impl web::Responder {
             s
         };
 
-        data.insert(id, json!({
-            "name": p.name,
-            "score": p.score,
-            "potential": potential,
-            "age": (Instant::now() - p.created).as_secs(),
-            "lost": p.lost,
-            "money": p.money,
-            "stations": p.stations,
-        }));
+        data.insert(
+            id,
+            json!({
+                "name": p.name,
+                "score": p.score,
+                "potential": potential,
+                "age": (Instant::now() - p.created).as_secs(),
+                "lost": p.lost,
+                "money": p.money,
+                "stations": p.stations,
+            }),
+        );
     }
     build_response(Ok(to_value(data).unwrap()))
 }
