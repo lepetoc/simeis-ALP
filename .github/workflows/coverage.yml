@@ -32,9 +32,17 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
+            const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ['not enough tests']
-            })
+              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+              state: 'open'
+            });
+            if (prs.data.length > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: prs.data[0].number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['not enough tests']
+              });
+            }
