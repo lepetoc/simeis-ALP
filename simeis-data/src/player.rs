@@ -253,3 +253,30 @@ impl Player {
         Ok((price, cm.rank))
     }
 }
+
+#[cfg(test)]
+use rand::Rng;
+
+// Not a property based test
+#[test]
+fn test_player_buy_ship() {
+    crate::tests::create_property_based_test(100000, &[], |rng| {
+        let station_id = rng.random();
+        let (x, y, z) = (rng.random(), rng.random(), rng.random());
+
+        let station = &mut Station::init(station_id, (x, y, z));
+
+        let ship_id = station.shipyard[0].id;
+
+        let name = String::from("JohnDoe");
+        let mut player = Player::new((station_id, (x, y, z)), name);
+
+        let init_money = player.money;
+
+        if player.buy_ship(station, ship_id).is_err() {
+            eprintln!("Error buying the ship");
+        }
+
+        assert!(init_money > player.money);
+    });
+}
