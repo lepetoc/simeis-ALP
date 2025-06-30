@@ -57,7 +57,7 @@ jobs:
                 repo: context.repo.repo,
                 labels: ['not enough tests']
               });
-              echo "not enough tests"
+              console.log('not enough tests');
             } else {
-              echo "Aucune PR ouverte trouvée pour cette branche."
+              console.log('Aucune PR ouverte trouvée pour cette branche.');
             }
