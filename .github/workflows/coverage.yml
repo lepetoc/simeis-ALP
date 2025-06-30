@@ -1,6 +1,8 @@
 name: coverage.yml
 
-on: [ push ]
+on:
+  push:
+    branches: '*'
 
 jobs:
   test:
