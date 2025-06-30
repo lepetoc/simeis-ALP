@@ -370,3 +370,38 @@ fn test_compute_sector() {
 fn test_heavy_testing() {
     assert!(false);
 }
+
+#[test]
+fn test_distance_calculation() {
+    crate::tests::create_property_based_test(100000, &[], |rng| {
+        let (x, y, z) = (rng.random(), rng.random(), rng.random());
+
+        let (x2, y2, z2) = (rng.random(), rng.random(), rng.random());
+
+        let init_dist = get_distance(&(x, y, z), &(x2, y2, z2));
+
+        let add = rng.random_range(1..100);
+
+        println!("DISTANCE INITIALE: {}", init_dist);
+        let new_pos = (
+            x2.saturating_add(add),
+            y2.saturating_add(add),
+            z2.saturating_add(add),
+        );
+        let new_dist = get_distance(&(x, y, z), &new_pos);
+        println!("NOUVELLE DISTANCE: {}", new_dist);
+
+        let minus_pos = (
+            x2.saturating_sub(add),
+            y2.saturating_sub(add),
+            z2.saturating_sub(add),
+        );
+        let minus_dist = get_distance(&(x, y, z), &minus_pos);
+
+        if init_dist > new_dist {
+            assert!(minus_dist > init_dist);
+        } else {
+            assert!(minus_dist < init_dist);
+        }
+    });
+}
