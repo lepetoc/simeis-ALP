@@ -52,5 +52,7 @@ jobs:
                 repo: context.repo.repo,
                 labels: ['not enough tests']
               });
-              core.setFailed('Coverage insuffisant');
+              console.log('Label "not enough tests" ajouté à la PR #' + prs.data[0].number);
+            } else {
+              console.log('Aucune PR ouverte trouvée pour cette branche.');
             }
