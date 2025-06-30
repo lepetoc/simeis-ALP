@@ -44,14 +44,12 @@ jobs:
             const branch = context.payload.pull_request
               ? context.payload.pull_request.head.ref
               : context.ref.replace('refs/heads/', '');
-            console.log('Branche recherchée :', branch);
             const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
-            console.log('PRs trouvées :', prs.data.map(pr => pr.head.ref));
             if (prs.data.length > 0) {
               await github.rest.issues.addLabels({
                 issue_number: prs.data[0].number,
