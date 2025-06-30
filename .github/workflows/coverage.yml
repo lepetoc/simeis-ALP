@@ -27,10 +27,12 @@ jobs:
           COVERAGE=$(echo "$OUTPUT" | grep -oP '\d+\.\d+(?=% coverage)' | tail -1)
           echo "Coverage: $COVERAGE%"
           
-          if [ "$(echo "$COVERAGE < 5" | bc -l)" = "1" ]; then
+          if [ "$(echo "$COVERAGE < 50" | bc -l)" = "1" ]; then
             echo "add_label=true" >> $GITHUB_OUTPUT
+            console.log('coverage percent below to 50%, processing next step');
           else
             echo "add_label=false" >> $GITHUB_OUTPUT
+            console.log('coverage percent above to 50%, skipping next step');
           fi
 
       - name: add "not enough tests" if insufficient coverage
