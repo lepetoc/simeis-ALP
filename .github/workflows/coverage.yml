@@ -17,6 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install bc
+        run: apt-get update && apt-get install -y bc
+
       - name: Generate code coverage and check percentage
         id: coverage
         run: |
@@ -29,8 +32,6 @@ jobs:
           else
             echo "add_label=false" >> $GITHUB_OUTPUT
           fi
-      - name: Install bc
-        run: apt-get update && apt-get install -y bc
 
       - name: add "not enough tests" if insufficient coverage
         if: steps.coverage.outputs.add_label == 'true'
