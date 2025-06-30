@@ -27,7 +27,7 @@ jobs:
           COVERAGE=$(echo "$OUTPUT" | grep -oP '\d+\.\d+(?=% coverage)' | tail -1)
           echo "Coverage: $COVERAGE%"
           
-          if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+          if [ "$(echo "$COVERAGE < 50" | bc -l)" = "1" ]; then
             echo "add_label=true" >> $GITHUB_OUTPUT
           else
             echo "add_label=false" >> $GITHUB_OUTPUT
