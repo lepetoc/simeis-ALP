@@ -1,8 +1,6 @@
 name: coverage.yml
 
-on:
-  pull_request:
-    types: [ opened, edited ]
+on: [ push ]
 
 jobs:
   test:
@@ -22,18 +20,17 @@ jobs:
       - name: Check code coverage percentage
         id: coverage
         run: |
-          OUTPUT=$(cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml)
-          COVERAGE=$(echo "$OUTPUT" | grep -oP '\d+\.\d+(?=% coverage)' | tail -1)
+          COVERAGE=$(grep -oP '\d+\.\d+(?=% coverage)' coverage_output.txt | tail -1)
           echo "Coverage: $COVERAGE%"
           
           if (( $(echo "$COVERAGE < 50" | bc -l) )); then
-            echo "add_label=true" >> $GITHUB_OUTPUT
+          echo "add_label=true" >> $GITHUB_OUTPUT
           else
-            echo "add_label=false" >> $GITHUB_OUTPUT
+          echo "add_label=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Add "not enough tests" if insufficient coverage
-        if: ${{ steps.coverage.outputs.add_label == 'true' && github.event_name == 'pull_request' }}
+      - name: add "not enough tests" if insufficient coverage
+        if: steps.coverage.outputs.add_label == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
