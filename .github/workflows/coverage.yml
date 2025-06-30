@@ -29,16 +29,26 @@ jobs:
           else
             echo "add_label=false" >> $GITHUB_OUTPUT
           fi
+      - name: Install bc
+        run: apt-get update && apt-get install -y bc
 
       - name: add "not enough tests" if insufficient coverage
-        if: ${{ steps.coverage.outputs.add_label == 'true' && github.event_name == 'pull_request' }}
+        if: steps.coverage.outputs.add_label == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
+            const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ['not enough tests']
-            })
+              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+              state: 'open'
+            });
+            if (prs.data.length > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: prs.data[0].number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['not enough tests']
+              });
+            }
