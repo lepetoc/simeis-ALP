@@ -1,0 +1,38 @@
+[config]
+base_url = "http://0.0.0.0:9345"
+
+[[tests]]
+name = "Ping"
+expected_body = { "error" = "ok", "ping" = "pong" }
+method = "GET"
+endpoint = "/ping"
+expected_status = 200
+
+[[tests]]
+name = "Creating player"
+method = "GET"
+endpoint = "/player/new/JohnDoe"
+expected_status = 200
+store = { "$.key" = "key" }
+
+# Since the user id is a hash of the username, it'll always be 37965 for JohnDoe
+[[tests]]
+name = "Getting player profile"
+method = "GET"
+endpoint = "/player/37965"
+# For now we need to pass the key by hand because the variable doesn't work
+query_params = { "key" = "" }
+expected_status = 200
+
+# We test if the response body contains
+[[tests.assertions]]
+type = "Contains"
+value = { "id" = 37965, "name" = "JohnDoe" }
+
+[[tests]]
+name = "Getting player profile"
+method = "GET"
+endpoint = "/player/37965"
+# For now we need to pass the key by hand because the variable doesn't work
+query_params = { "key" = "" }
+expected_status = 200
