@@ -1,0 +1,63 @@
+name: coverage.yml
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  test:
+    name: coverage
+    runs-on: ubuntu-latest
+    container:
+      image: xd009642/tarpaulin:develop-nightly
+      options: --security-opt seccomp=unconfined
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install bc
+        run: apt-get update && apt-get install -y bc
+
+      - name: Generate code coverage and check percentage
+        id: coverage
+        run: |
+          OUTPUT=$(cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml)
+          COVERAGE=$(echo "$OUTPUT" | grep -oP '\d+\.\d+(?=% coverage)' | tail -1)
+          echo "Coverage: $COVERAGE%"
+          
+          if [ "$(echo "$COVERAGE < 50" | bc -l)" = "1" ]; then
+            echo "add_label=true" >> $GITHUB_OUTPUT
+            echo "coverage percent below 50%, processing next step"
+          else
+            echo "add_label=false" >> $GITHUB_OUTPUT
+            echo "coverage percent above 50%, skipping next step"
+          fi
+
+      - name: add "not enough tests" if insufficient coverage
+        if: steps.coverage.outputs.add_label == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const branch = context.payload.pull_request
+              ? context.payload.pull_request.head.ref
+              : context.ref.replace('refs/heads/', '');
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${branch}`,
+              state: 'open'
+            });
+            if (prs.data.length > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: prs.data[0].number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['not enough tests']
+              });
+              console.log('not enough tests');
+            } else {
+              console.log('Aucune PR ouverte trouvée pour cette branche.');
+            }
