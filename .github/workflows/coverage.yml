@@ -1,6 +1,10 @@
 name: coverage.yml
 
-on: [push]
+on:
+  push:
+    branches: '*'
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
@@ -27,22 +31,14 @@ jobs:
           fi
 
       - name: add "not enough tests" if insufficient coverage
-        if: steps.coverage.outputs.add_label == 'true'
+        if: ${{ steps.coverage.outputs.add_label == 'true' && github.event_name == 'pull_request' }}
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const prs = await github.rest.pulls.list({
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
-              state: 'open'
-            });
-            if (prs.data.length > 0) {
-              await github.rest.issues.addLabels({
-                issue_number: prs.data[0].number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                labels: ['not enough tests']
-              });
-            }
+              labels: ['not enough tests']
+            })
