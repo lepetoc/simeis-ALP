@@ -29,10 +29,10 @@ jobs:
           
           if [ "$(echo "$COVERAGE < 50" | bc -l)" = "1" ]; then
             echo "add_label=true" >> $GITHUB_OUTPUT
-            console.log('coverage percent below to 50%, processing next step');
+            echo "coverage percent below 50%, processing next step"
           else
             echo "add_label=false" >> $GITHUB_OUTPUT
-            console.log('coverage percent above to 50%, skipping next step');
+            echo "coverage percent above 50%, skipping next step"
           fi
 
       - name: add "not enough tests" if insufficient coverage
@@ -59,7 +59,7 @@ jobs:
                 repo: context.repo.repo,
                 labels: ['not enough tests']
               });
-              console.log("not enough tests");
+              echo "not enough tests"
             } else {
-              console.log('Aucune PR ouverte trouvée pour cette branche.');
+              echo "Aucune PR ouverte trouvée pour cette branche."
             }
