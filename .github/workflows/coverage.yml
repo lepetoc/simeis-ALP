@@ -29,7 +29,7 @@ jobs:
           fi
 
       - name: add "not enough tests" if insufficient coverage
-        if: steps.coverage.outputs.add_label == 'true' && github.event_name == 'pull_request' }}
+        if: steps.coverage.outputs.add_label == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
