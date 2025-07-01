@@ -17,8 +17,8 @@ jobs:
     - uses: actions/cache@v4
       with:
         path: |
-          docs/manual.pdf
-        key: ${{ runner.os }}-cargo-${{ hashFiles('docs/manual.typ') }}
+          doc/manual.pdf
+        key: ${{ runner.os }}-cargo-${{ hashFiles('doc/manual.typ') }}
       
     - name: Build
       if: steps.cache.outputs.cache-hit != 'true'
