@@ -7,24 +7,7 @@ on:
       - 'release/**'
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: Installation audit
-        run: cargo install cargo-audit
-      - name: Cache cargo
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
   tests-unitaires:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +16,6 @@ jobs:
         run: cargo test --features heavy-testing
 
   build-debug:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +24,6 @@ jobs:
         run: cargo build --features heavy-testing
 
   tests-fonctionnels:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +34,6 @@ jobs:
           ./scripts/tests_fonctionnel.sh
 
   audit-securite:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +44,6 @@ jobs:
         run: cargo audit
 
   check-dependances:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
