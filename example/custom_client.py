@@ -307,6 +307,23 @@ class Game:
         if ship["position"] != station["position"]:
             self.travel(ship["id"], station["position"])
 
+        reactor_upgrade = self.get(f"/station/{self.sta}/shipyard/upgrade")["ReactorUpgrade"]
+
+        print(f"[$] Prix de l'amélioration du réacteur : {reactor_upgrade["price"]}")
+
+        
+
+        print(self.get(f"/station/{self.sta}/shop/modules")[self.modtype])
+
+        if (reactor_upgrade["price"]*1.2 < self.updateStatut()["money"]
+            and self.updateStatut()["ships"][0]["reactor_power"] < 3):
+            self.get(f"/station/{self.sta}/shipyard/upgrade/{self.sid}/ReactorUpgrade")
+            print("[!] Upgrade of Reactor done")
+        
+        if self.get(f"/station/{self.sta}/shop/modules")[self.modtype]*1.2 < self.updateStatut()["money"]:
+            self.get(f"/station/{self.sta}/shop/modules/{self.sid}/buy/{self.modtype}")
+            print(f"[!] {self.modtype} Upgrade done")
+
         self.ship_repair(self.sid)
         self.ship_refuel(self.sid)
 
@@ -325,6 +342,9 @@ class Game:
                     unloaded["unloaded"], res, sold["added_money"]
                 )
             )
+
+    def updateStatut(self):
+        return self.get("/player/{}".format(self.player["playerId"]))
 
 
 if __name__ == "__main__":
