@@ -22,6 +22,4 @@ jobs:
         override: true
     
     - name: Build
-      run: make build-simeis
-    - name: Clean artifacts
-      run: make clean
+      run: cargo build --release
