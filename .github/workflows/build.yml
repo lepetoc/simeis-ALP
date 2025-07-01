@@ -10,21 +10,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions-rust-lang/setup-rust-toolchain@v1
+    
+    - name: Install typst-cli
+      run: cargo install typst-cli
 
     - uses: actions/cache@v4
       with:
         path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('$HOME/.cargo/bin/typst') }}
-    
-    - name: Install typst-cli
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: cargo install typst-cli
+          docs/manual.pdf
+        key: ${{ runner.os }}-cargo-${{ hashFiles('docs/manual.typ') }}
       
     - name: Build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: make generate-docs
       
   check-build:
