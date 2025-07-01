@@ -22,7 +22,7 @@ jobs:
   check-todo:
     runs-on: ubuntu-latest
     steps:
-      - run: scripts/todo_checker.sh
+      - run: bash scripts/todo_checker.sh
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
