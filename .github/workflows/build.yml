@@ -39,3 +39,6 @@ jobs:
     - name: Build
       if: steps.cache.outputs.cache-hit != 'true'
       run: make build-simeis
+    - name: Clean
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: cargo clean --doc
