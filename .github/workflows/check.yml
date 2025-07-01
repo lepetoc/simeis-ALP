@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [ opened, edited ]
   push:
-    branches-ignore: [ "main" ]
+    branches-ignore: [ "release/**" ]
 
 jobs:
   check:
@@ -19,6 +19,10 @@ jobs:
       run: make lint
     - name: Cargo test
       run: make test
+  check-todo:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ..scripts/todo_checker.sh
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
