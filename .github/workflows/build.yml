@@ -33,7 +33,7 @@ jobs:
       with:
         path: |
           target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/src/*.rs') }}
     - name: Build
       run: make build-simeis
     - name: Clean artifacts
