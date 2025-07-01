@@ -15,6 +15,7 @@ jobs:
       run: cargo install typst-cli
 
     - uses: actions/cache@v4
+      id: cache
       with:
         path: |
           doc/manual.pdf
@@ -29,13 +30,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions-rust-lang/setup-rust-toolchain@v1
-    - name: Check cache
-      uses: actions/cache@v4
+    - uses: actions/cache@v4
+      id: cache
       with:
         path: |
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/src/*.rs') }}
     - name: Build
+      if: steps.cache.outputs.cache-hit != 'true'
       run: make build-simeis
     - name: Clean artifacts
+      if: steps.cache.outputs.cache-hit != 'true'
       run: make clean
