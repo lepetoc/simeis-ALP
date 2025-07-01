@@ -39,6 +39,3 @@ jobs:
     - name: Build
       if: steps.cache.outputs.cache-hit != 'true'
       run: make build-simeis
-    - name: Clean artifacts
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: make clean
