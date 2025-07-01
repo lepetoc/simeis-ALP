@@ -8,7 +8,7 @@ jobs:
   check-build:
     strategy:
      matrix:
-       version: [1.75.0, 1.80.0, 1.85.0, 1.88.0]
+       version: ["1.75.0", "1.80.0", "1.85.0", "1.88.0"]
        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     name: Build with Rust ${{ matrix.rust }} on ${{ matrix.os }}
