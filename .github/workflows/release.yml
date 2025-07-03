@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      rolling-release:
+        type: string
+        description: 'Rolling-release (eg: v2023.11.18.2)'
+        required: true
+
+  push:
+    branches:
+      - 'release/*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ inputs.rolling-release }}
+          tag_name: ${{ inputs.rolling-release }}
+          files: ./target/release/oxide
