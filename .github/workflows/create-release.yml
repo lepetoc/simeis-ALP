@@ -33,7 +33,28 @@ jobs:
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
         mv ./target/release/simeis-server ./target/release/${FILE_NAME}
-              
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        git fetch --tags
+        LAST_TAG=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null || echo "")
+        
+        echo "## What's Changed in Release ${VERSION}" > changelog.md
+        echo "" >> changelog.md
+        
+        if [ -z "$LAST_TAG" ]; then
+          git log --oneline --no-merges | head -20 | while read line; do
+          echo "- $line" >> changelog.md
+          done
+        fi
+        
+        {
+          echo "changelog<<EOF"
+          cat changelog.md
+          echo "EOF"
+        } >> $GITHUB_OUTPUT
+
     - name: Release
       if: ${{ matrix.version == '1.85.0' }}
       uses: mini-bomba/create-github-release@v1.1.3
@@ -42,6 +63,8 @@ jobs:
           tag: ${{ steps.rename.outputs.version }}
           name: ${{ steps.rename.outputs.version }}
           body: |
+            ${{ steps.changelog.outputs.changelog }}
+            ---
             This automatic prerelease is built from commit ${{ env.GIT_HASH }} and was triggered by @${{ github.actor }}
             [Github Actions workflow run that built this prerelease](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
