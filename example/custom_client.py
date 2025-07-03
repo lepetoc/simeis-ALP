@@ -1,6 +1,6 @@
 PORT = 8080
-URL = f"http://103.45.247.164:{PORT}"
-# URL = f"http://0.0.0.0:{PORT}"
+# URL = f"http://103.45.247.164:{PORT}"
+URL = f"http://0.0.0.0:{PORT}"
 
 import os
 import sys
@@ -307,22 +307,33 @@ class Game:
         if ship["position"] != station["position"]:
             self.travel(ship["id"], station["position"])
 
-        reactor_upgrade = self.get(f"/station/{self.sta}/shipyard/upgrade")["ReactorUpgrade"]
+        reactor_upgrade = self.get(f"/station/{self.sta}/shipyard/upgrade")[
+            "ReactorUpgrade"
+        ]
+
+        print(
+            f"[$] Prix de l'amélioration du module {self.get(f"/station/{self.sta}/shop/modules/{self.sid}/upgrade")["1"][
+                "price"
+            ]}"
+        )
+
+        if (
+            self.get(f"/station/{self.sta}/shop/modules/{self.sid}/upgrade")["1"][
+                "price"
+            ]
+            * 1.2
+            < self.updateStatut()["money"]
+        ):
+            self.get(f"/station/{self.sta}/shop/modules/{self.sid}/upgrade/1")
+            print(f"[!] {self.modtype} Upgrade done")
 
         print(f"[$] Prix de l'amélioration du réacteur : {reactor_upgrade["price"]}")
-
-        
-
-        print(self.get(f"/station/{self.sta}/shop/modules")[self.modtype])
-
-        if (reactor_upgrade["price"]*1.2 < self.updateStatut()["money"]
-            and self.updateStatut()["ships"][0]["reactor_power"] < 3):
+        if (
+            reactor_upgrade["price"] * 1.2 < self.updateStatut()["money"]
+            and self.updateStatut()["ships"][0]["reactor_power"] < 5
+        ):
             self.get(f"/station/{self.sta}/shipyard/upgrade/{self.sid}/ReactorUpgrade")
             print("[!] Upgrade of Reactor done")
-        
-        if self.get(f"/station/{self.sta}/shop/modules")[self.modtype]*1.2 < self.updateStatut()["money"]:
-            self.get(f"/station/{self.sta}/shop/modules/{self.sid}/buy/{self.modtype}")
-            print(f"[!] {self.modtype} Upgrade done")
 
         self.ship_repair(self.sid)
         self.ship_refuel(self.sid)
