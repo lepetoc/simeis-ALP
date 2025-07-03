@@ -20,6 +20,7 @@ jobs:
       with:
         toolchain: ${{ matrix.version }}
         override: false
+        cache: false
     
     - name: Build
       run: cargo build --release
