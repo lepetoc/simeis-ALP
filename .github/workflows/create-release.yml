@@ -75,3 +75,4 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
           files: |
             ./target/release/${{ steps.rename.outputs.file_name }}
+
