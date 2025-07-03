@@ -4,9 +4,6 @@ on:
   push:
     branches: [ "release/**" ]
 
-env: 
-    RELEASE_VER: ${{ github.head_ref.replace("release/", v) }}
-
 jobs:
   check-build:
     strategy:
@@ -28,7 +25,7 @@ jobs:
       run: cargo build --release
 
     - name: Rename binary
-      run: mv ./target/release/simeis-server ./target/release/simeis-${{matrix.os}}-$RELEASE_VER
+      run: mv ./target/release/simeis-server ./target/release/simeis-${{matrix.os}}-${{ github.head_ref.replace("release/", v) }}
 
     - name: Release
       if: ${{ matrix.version == "1.88.0" }}
@@ -44,4 +41,4 @@ jobs:
             Commit message:
             ${{ env.GIT_MESSAGE }}
           files: |
-            ./target/release/simeis-${{matrix.os}}-$RELEASE_VER
+            ./target/release/simeis-${{matrix.os}}-${{ github.head_ref.replace("release/", v) }}
