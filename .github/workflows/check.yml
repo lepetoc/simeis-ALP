@@ -22,9 +22,8 @@ jobs:
   check-todo:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          ls -la
-          bash scripts/todo_checker.sh
+      - uses: actions/checkout@v4
+      - run: bash scripts/todo_checker.sh
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
