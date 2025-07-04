@@ -108,6 +108,8 @@ jobs:
           systemctl start simeis.service
           EOF
 
+          chmod 755 ./simeis/DEBIAN/postinst
+
           dpkg-deb --build simeis
 
       - name: Get version
