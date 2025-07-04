@@ -1,4 +1,4 @@
-FROM rust:1.85-bookworm as builder
+FROM rust:1.85-bookworm AS builder
 
 WORKDIR /usr/src/simeis
 COPY . .
@@ -7,9 +7,11 @@ RUN cargo install --path .
 
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
-    extra-runtime-dependencies \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local/cargo/bin/simeis /usr/local/bin/simeis
+
+EXPOSE 8080
 
 CMD ["simeis"]
