@@ -1,15 +1,11 @@
 FROM debian:bookworm-slim
 WORKDIR /tmp
 
+#Waiting for the .deb to be compiled and copy it
+COPY target/release ./
 # Install the application dependencies
-RUN apt update && \
-    apt-get install -y curl && \
-    curl -L https://github.com/lepetoc/simeis-ALP/releases/download/vchangelog-real/simeis-server_V0.deb -o simeis.deb && \
-    dpkg -i ./simeis.deb && \
-    rm simeis.deb && \
-    apt-get remove -y curl && \
-    apt-get autoremove -y && \
-    apt-get clean
+RUN dpkg -i ./simeis.deb && \
+    rm simeis.deb
 
 EXPOSE 8080
 
