@@ -51,6 +51,7 @@ jobs:
             
           files: |
             ./target/release/${{ steps.rename.outputs.file_name }}
+          clear_attachments: false
 
   debian-compiler:
     needs: check-build
@@ -108,3 +109,4 @@ jobs:
               ${{ env.GIT_MESSAGE }}
             
             files: ./target/release/simeis.deb
+            clear_attachments: false
