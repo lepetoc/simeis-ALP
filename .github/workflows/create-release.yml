@@ -33,7 +33,49 @@ jobs:
         echo "version=${VERSION}" >> $GITHUB_OUTPUT
         echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
         mv ./target/release/simeis-server ./target/release/${FILE_NAME}
-              
+
+    - name: Generate changelog
+      if: ${{ matrix.version == '1.85.0' }}
+      id: changelog
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Get latest release tag
+        LATEST_TAG=$(git tag --sort=-version:refname | grep '^v' | head -1)
+        if [ -z "$LATEST_TAG" ]; then
+          LATEST_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+
+        # Get merged PRs since last release
+        CHANGELOG=""
+        gh pr list --state merged --search "merged:>${LATEST_TAG}" --json number,title,url | \
+        jq -r '.[] | "- [#\(.number)](\(.url)) \(.title)"' | while read -r line; do
+          CHANGELOG="${CHANGELOG}${line}\n"
+        done
+
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- No changes in this release"
+        fi
+
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo -e "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Release
+      if: ${{ matrix.version == '1.85.0' }}
+      uses: mini-bomba/create-github-release@v1.1.3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ steps.rename.outputs.version }}
+        name: ${{ steps.rename.outputs.version }}
+        body: |
+          This automatic prerelease is built from commit ${{ env.GIT_HASH }} and was triggered by @${{ github.actor }}
+          [Github Actions workflow run that built this prerelease](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ${{ steps.changelog.outputs.changelog }}
+        files: |
+          ./target/release/${{ steps.rename.outputs.file_name }}
+
     - name: Release
       if: ${{ matrix.version == '1.85.0' }}
       uses: mini-bomba/create-github-release@v1.1.3
@@ -49,3 +91,24 @@ jobs:
             ${{ env.GIT_MESSAGE }}
           files: |
             ./target/release/${{ steps.rename.outputs.file_name }}
+
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker buildx build -t simeis -f .github/dockerfile .
+
+      - name: Save Docker image
+        run: |
+          docker image save --platform linux/amd64 simeis -o simeis.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: simeis-docker-image
+          path: simeis.tar
