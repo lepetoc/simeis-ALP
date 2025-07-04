@@ -6,7 +6,7 @@ COPY target/release/simeis.deb ./
 
 # Install the application dependencies
 RUN apt-get update && \
-    apt-get install -y ./simeis.deb
+    apt-get install -y ./simeis.deb && \
     rm ./simeis.deb
 
 EXPOSE 8080
