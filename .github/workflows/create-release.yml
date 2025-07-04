@@ -86,19 +86,18 @@ jobs:
           EOF
           dpkg-deb --build simeis
 
-      - name: Get release info
-        id: get_release
-        uses: bruceadams/get-release@v1.3.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ needs.check-build.outputs.version || github.ref_name }}
-
+      - name: Get version number
+        id: get_version
+        run: |
+          BRANCH_NAME=${{github.ref_name}}
+          VERSION=${BRANCH_NAME//release\//v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      
       - name: Upload Debian package as release asset
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ steps.get_release.outputs.tag_name }}
+          tag: ${{ steps.get_version.outputs.version }}
+          name: ${{ steps.get_version.outputs.version }}
           files: ./target/release/simeis.deb
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
