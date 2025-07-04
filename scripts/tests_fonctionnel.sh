@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 cargo run -F testing &
 CARGO_PID=$!
 echo "Serveur lancé (PID=$CARGO_PID), attente de l'ouverture du port 9345..."
