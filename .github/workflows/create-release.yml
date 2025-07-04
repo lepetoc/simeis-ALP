@@ -47,5 +47,58 @@ jobs:
 
             Commit message:
             ${{ env.GIT_MESSAGE }}
+
+            
           files: |
             ./target/release/${{ steps.rename.outputs.file_name }}
+
+  debian-compiler:
+    needs: check-build
+    runs-on: ubuntu-latest
+    name: Debian compiler
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release
+        run: cargo build --release
+        
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Prepare Debian package
+        run: |
+          cd ./target/release
+          mkdir -p ./simeis/usr/bin
+          cp simeis-server ./simeis/usr/bin
+          mkdir -p simeis/DEBIAN
+          cat <<'EOF' > ./simeis/DEBIAN/control
+          Package: simeis
+          Version: 1.0
+          Section: base
+          Priority: optional
+          Architecture: all
+          Depends: systemd
+          Maintainer: Lucas sans chaise <LaChaise.com>
+          Description: Rust Game pour se taper entre nous a travers un plan financier sans scrupule dans l'espace
+          EOF
+          dpkg-deb --build simeis
+
+      - name: Get release info
+        id: get_release
+        uses: bruceadams/get-release@v1.3.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ needs.check-build.outputs.version || github.ref_name }}
+
+      - name: Upload Debian package as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.get_release.outputs.tag_name }}
+          files: ./target/release/simeis.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
