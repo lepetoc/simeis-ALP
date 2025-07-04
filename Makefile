@@ -21,3 +21,11 @@ format:
 
 lint:
 	cargo clippy -- -D warnings
+
+debian:
+	cd ./target/release; \
+	mkdir -p ./simeis-server_V0/usr/bin; \
+	cp simeis-server ./simeis-server_V0/usr/bin; \
+	mkdir -p simeis-server_V0/DEBIAN; \
+	cp control simeis-server_V0/DEBIAN; \
+	dpkg-deb --build simeis-server_V0; \

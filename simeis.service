@@ -1,0 +1,11 @@
+[Unit]
+Description=Simeis Server service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/simeis-server
+Restart=always
+User=simeis
+
+[Install]
+WantedBy=multi-user.target

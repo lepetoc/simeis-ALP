@@ -1,0 +1,12 @@
+
+Package: simeis
+Version: 1.0
+Section: base
+Priority: optional
+Architecture: all
+Depends: systemd
+Maintainer: Lucas sans chaise <LaChaise.com>
+Description: Simeis est un jeu par API (inspiré de SpaceTraders), dont le but est de faire fructifier votre empire économique dans toute la galaxie.
+  Dans ce manuel, vous trouverez les mécaniques de base du jeu, c’est à vous de porter ces
+  mécaniques de bases vers l’excellence intergalactique !
+
