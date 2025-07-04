@@ -91,6 +91,7 @@ jobs:
         run: |
           BRANCH_NAME=${{github.ref_name}}
           VERSION=${BRANCH_NAME//release\//v}
+          echo ${VERSION}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Upload Debian package as release asset
