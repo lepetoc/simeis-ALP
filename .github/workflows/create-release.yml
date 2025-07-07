@@ -136,7 +136,7 @@ jobs:
               ${{ env.GIT_MESSAGE }}
             
             files: |
-              ./target/release/simeis.deb
+              ./target/release/simeis-ALP.deb
               simeis-docker-${{ steps.get_version.outputs.version }}.tar.gz
               
             clear_attachments: false
