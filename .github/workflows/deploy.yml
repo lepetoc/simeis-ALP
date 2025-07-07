@@ -17,4 +17,10 @@ jobs:
 
       - name: Check deb presence
         run: ls -la
+
+      - name: Create id_rsa file
+        run: echo ${{ secrets.DEPLOY_SSH_KEY }} >> id_rsa
+
+      - name: Copy deb to server
+        run: scp -i id_rsa ./simeis-ALP.deb student@103.45.247.164:~/AlexLucaPierre
           
