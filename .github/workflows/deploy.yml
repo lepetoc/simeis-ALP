@@ -21,7 +21,7 @@ jobs:
       - name: Create id_rsa file
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" >> id_rsa
-          cat id_rsa
+          ls -la
 
       - name: Copy deb to server
         run: scp -i id_rsa ./simeis-ALP.deb student@103.45.247.164:~/AlexLucaPierre
