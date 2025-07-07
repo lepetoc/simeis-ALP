@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" >> id_rsa
           echo ${{ vars.DEPLOY_SERVER_IP }}
-          chmod 600 id_rsa
+          chmod 777 id_rsa
           shasum id_rsa
 
       - name: Copy deb to server
