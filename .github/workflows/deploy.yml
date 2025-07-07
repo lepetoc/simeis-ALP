@@ -26,5 +26,5 @@ jobs:
           shasum id_rsa
 
       - name: Copy deb to server
-        run: scp -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
+        run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
           
