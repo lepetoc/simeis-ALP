@@ -20,9 +20,9 @@ jobs:
 
       - name: Create id_rsa file
         run: |
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa.pub
-          chmod 777 id_rsa.pub
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
+          chmod 777 id_rsa
 
       - name: Copy deb to server
-        run: scp -o StrictHostKeyChecking=no -i ./id_rsa.pub ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
+        run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
           
