@@ -24,5 +24,5 @@ jobs:
           chmod 777 id_rsa.pub
 
       - name: Copy deb to server
-        run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
+        run: scp -o StrictHostKeyChecking=no -i ./id_rsa.pub ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
           
