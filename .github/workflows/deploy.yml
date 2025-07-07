@@ -25,4 +25,10 @@ jobs:
 
       - name: Copy deb to server
         run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
+
+      - name: Install deb to server
+        run:  ssh projectrw@${{ vars.DEPLOY_SERVER_IP }} 'sudo apt install ~/AlexLucaPierre/simeis-ALP.deb -y'
+
+      - name: Ping server
+        run: curl ${{ vars.DEPLOY_SERVER_IP }}:${{ vars.DEPLOY_SERVER_PORT }}/ping
           
