@@ -3,9 +3,9 @@ Description=Simeis Server service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/simeis-server
+ExecStart=/usr/bin/simeis-ALP
 Restart=always
-User=simeis
+User=simeis-ALP
 
 [Install]
 WantedBy=multi-user.target
