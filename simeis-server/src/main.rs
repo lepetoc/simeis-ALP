@@ -10,7 +10,7 @@ pub type GameState = ntex::web::types::State<Game>;
 #[ntex::main]
 async fn main() -> std::io::Result<()> {
     #[cfg(not(feature = "testing"))]
-    let port = 8080;
+    let port = 9999;
 
     #[cfg(feature = "testing")]
     let port = 9345;
