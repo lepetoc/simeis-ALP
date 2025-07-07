@@ -5,7 +5,7 @@ on:
     inputs:
       version-tag:
         type: string
-        description: 'v1.9.10'
+        description: 'Existing tag name (eg: v1.9.10)'
         required: true
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get deb
-        run: curl https://github.com/lepetoc/simeis-ALP/releases/download/${{ inputs.version-tag }}/simeis-ALP.deb
+        run: wget https://github.com/lepetoc/simeis-ALP/releases/download/${{ inputs.version-tag }}/simeis-ALP.deb -O simeis-ALP.deb
 
       - name: Check deb presence
         run: ls -la
