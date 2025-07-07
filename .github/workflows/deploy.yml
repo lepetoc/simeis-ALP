@@ -20,11 +20,11 @@ jobs:
 
       - name: Create id_rsa file
         run: |
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" >> id_rsa
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
           echo ${{ vars.DEPLOY_SERVER_IP }}
           chmod 777 id_rsa
           shasum id_rsa
 
       - name: Copy deb to server
-        run: scp -i id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
+        run: scp -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
           
