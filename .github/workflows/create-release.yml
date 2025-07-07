@@ -94,6 +94,8 @@ jobs:
             mécaniques de bases vers l’excellence intergalactique !
           EOF
 
+          chmod 755 ./simeis/DEBIAN/control
+
           cat <<'EOF' > ./simeis/DEBIAN/postinst
           useradd --system --no-create-home --shell /usr/sbin/nologin simeis
 
