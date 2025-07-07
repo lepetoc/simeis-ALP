@@ -21,6 +21,7 @@ jobs:
       - name: Create id_rsa file
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" >> id_rsa
+          echo ${{ vars.DEPLOY_SERVER_IP }}
           chmod 600 id_rsa
 
       - name: Copy deb to server
