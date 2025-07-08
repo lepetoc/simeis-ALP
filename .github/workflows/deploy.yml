@@ -21,7 +21,7 @@ jobs:
           chmod 600 id_rsa
 
       - name: Install deb to server
-        run:  ssh -i ./id_rsa student@${{ vars.DEPLOY_SERVER_IP }} 'echo test'
+        run:  ssh -o StrictHostKeyChecking=no -i ./id_rsa student@${{ vars.DEPLOY_SERVER_IP }} 'echo test'
           
       - name: Copy deb to server
         run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
