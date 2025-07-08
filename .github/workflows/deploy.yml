@@ -15,9 +15,6 @@ jobs:
       - name: Get deb
         run: wget https://github.com/lepetoc/simeis-ALP/releases/download/${{ inputs.version-tag }}/simeis-ALP.deb -O simeis-ALP.deb
 
-      - name: Check deb presence
-        run: ls -la
-
       - name: Create id_rsa file
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
