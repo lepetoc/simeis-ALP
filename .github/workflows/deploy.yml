@@ -19,14 +19,15 @@ jobs:
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
           chmod 600 id_rsa
-          ping -c 1 8.8.8.8
-          ping -c 1 ${{ vars.DEPLOY_SERVER_IP }}
+
+      - name: Install deb to server
+        run:  ssh -i ./id_rsa student@${{ vars.DEPLOY_SERVER_IP }} 'echo test'
           
       - name: Copy deb to server
         run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
       
       - name: Install deb to server
-        run:  ssh -i ./id_rsa projectrw@${{ vars.DEPLOY_SERVER_IP }} 'sudo apt install ~/AlexLucaPierre/simeis-ALP.deb -y'
+        run:  ssh -i ./id_rsa student@${{ vars.DEPLOY_SERVER_IP }} 'sudo apt install ~/AlexLucaPierre/simeis-ALP.deb -y'
 
       - name: Ping server
         run: curl ${{ vars.DEPLOY_SERVER_IP }}:${{ vars.DEPLOY_SERVER_PORT }}/ping
