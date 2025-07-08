@@ -101,8 +101,8 @@ jobs:
 
           systemctl daemon-reexec
           systemctl daemon-reload
-          systemctl enable simeis.service
-          systemctl start simeis.service
+          systemctl enable simeis-ALP.service
+          systemctl start simeis-ALP.service
           EOF
 
           chmod 755 ./simeis-ALP/DEBIAN/postinst
