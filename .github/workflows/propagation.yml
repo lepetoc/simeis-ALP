@@ -1,0 +1,40 @@
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  propagate:
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'bug/')
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    
+    - name: Create propagation PRs
+      run: |
+          labels="${{ join(github.event.pull_request.labels..name, ' ') }}"
+          propagate_labels=$(echo "$labels" | grep -o 'propagate:release/[^ ]')
+    
+            if [ -z "$propagate_labels" ]; then
+              exit 0
+            fi
+    
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+            source_branch="${{ github.event.pull_request.head.ref }}"
+    
+            for label in $propagate_labels; do
+              target_branch=$(echo "$label" | sed 's/propagate://')
+    
+              curl -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$%7B%7B github.repository }}/pulls" \
+                -d "$(jq -n \
+                  --arg title "Propagate: $source_branch → $target_branch" \
+                  --arg head "$source_branch" \
+                  --arg base "$target_branch" \
+                  '{title: $title, head: $head, base: $base}')"
+            done
