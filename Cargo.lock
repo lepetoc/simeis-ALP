@@ -1041,7 +1041,7 @@ dependencies = [
 
 [[package]]
 name = "simeis-data"
-version = "0.1.0"
+version = "0.5.13"
 dependencies = [
  "base64",
  "env_logger",
@@ -1056,7 +1056,7 @@ dependencies = [
 
 [[package]]
 name = "simeis-server"
-version = "0.1.0"
+version = "0.5.13"
 dependencies = [
  "base64",
  "env_logger",
