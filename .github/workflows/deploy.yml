@@ -23,6 +23,7 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
           chmod 600 id_rsa
           ls -la /etc/ssh/
+          echo CASignatureAlgorithms +ssh-rsa >> /etc/ssh/sshd_config
 
       #- name: Copy deb to server
       #  run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
