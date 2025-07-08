@@ -23,17 +23,8 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
           chmod 600 id_rsa
           
-      #- name: Copy deb to server
-      #  run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
-
-      - name: Copy file via SSH password
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ vars.DEPLOY_SERVER_IP }}
-          port: 22
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "simeis-ALP.deb"
-          target: "~/AlexLucaPierre"
+      - name: Copy deb to server
+        run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb projectrw@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
       
       - name: Install deb to server
         run:  ssh -i ./id_rsa projectrw@${{ vars.DEPLOY_SERVER_IP }} 'sudo apt install ~/AlexLucaPierre/simeis-ALP.deb -y'
