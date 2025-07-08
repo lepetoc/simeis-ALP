@@ -19,20 +19,6 @@ jobs:
         run: |
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > id_rsa
           chmod 600 id_rsa
-
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/staging.key
-          chmod 600 ~/.ssh/staging.key
-          cat >>~/.ssh/config <<END
-          Host staging
-            HostName ${{ vars.DEPLOY_SERVER_IP }}
-            User student
-            IdentityFile ~/.ssh/staging.key
-            StrictHostKeyChecking no
-          END
-
-      - name: Test ssh staging
-        run:  ssh staging 'echo test'
           
       - name: Copy deb to server
         run: scp -o StrictHostKeyChecking=no -i ./id_rsa ./simeis-ALP.deb student@${{ vars.DEPLOY_SERVER_IP }}:~/AlexLucaPierre
